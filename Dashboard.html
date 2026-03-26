@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — La Tiendita Venezolana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rojo:#d62828;--naranja:#f77f00;--azul:#003049;--azul2:#004a73;
+  --fondo:#0f1923;--card:#1a2535;--card2:#1f2d3e;--borde:#2a3a4e;
+  --txt:#e8edf2;--muted:#7a9bb5;--success:#22c55e;--warn:#f59e0b;--danger:#ef4444;--info:#38bdf8;
+  --r:14px;--trans:all .25s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--fondo);color:var(--txt);min-height:100vh;display:flex}
+
+/* ── Sidebar ─────────────────────────────────────── */
+.sidebar{width:240px;background:var(--card);border-right:1px solid var(--borde);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s ease}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:12px}
+.sb-logo-img{width:40px;height:40px;border-radius:50%;border:2px solid var(--naranja);object-fit:cover}
+.sb-brand{font-family:'Playfair Display',serif;font-size:15px;color:var(--txt);line-height:1.2}
+.sb-brand em{color:var(--naranja);font-style:italic}
+.sb-badge{font-size:10px;background:var(--rojo);color:#fff;padding:2px 7px;border-radius:100px;font-weight:700;margin-top:2px;display:inline-block}
+.sb-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.sb-section{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 6px;margin-top:8px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:var(--trans);font-size:14px;font-weight:500;color:var(--muted);margin-bottom:2px;text-decoration:none}
+.sb-item:hover{background:rgba(255,255,255,.05);color:var(--txt)}
+.sb-item.active{background:linear-gradient(135deg,rgba(214,40,40,.25),rgba(247,127,0,.15));color:var(--naranja);border-left:3px solid var(--naranja)}
+.sb-item .icon{font-size:18px;width:22px;text-align:center}
+.sb-footer{padding:16px;border-top:1px solid var(--borde)}
+.sb-user{font-size:12px;color:var(--muted);font-weight:400}
+.sb-user strong{color:var(--txt);display:block;margin-bottom:2px}
+
+/* ── Main ────────────────────────────────────────── */
+.main{flex:1;margin-left:240px;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--card);border-bottom:1px solid var(--borde);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title h1{font-family:'Playfair Display',serif;font-size:20px;color:var(--txt)}
+.topbar-title p{font-size:12px;color:var(--muted);margin-top:2px}
+.topbar-actions{display:flex;gap:10px}
+.tb-btn{padding:9px 18px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:var(--trans);font-family:inherit}
+.tb-btn.primary{background:linear-gradient(135deg,var(--rojo),var(--naranja));color:#fff}
+.tb-btn.primary:hover{opacity:.9;transform:translateY(-1px)}
+.tb-btn.ghost{background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--borde)}
+.tb-btn.ghost:hover{background:rgba(255,255,255,.1)}
+.content{flex:1;padding:28px;overflow-y:auto}
+
+/* ── Tabs ────────────────────────────────────────── */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Metrics ─────────────────────────────────────── */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.metric-card{background:var(--card);border:1px solid var(--borde);border-radius:var(--r);padding:22px 20px;position:relative;overflow:hidden;transition:var(--trans)}
+.metric-card:hover{border-color:rgba(247,127,0,.3);transform:translateY(-1px)}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.mc-ventas::before{background:linear-gradient(90deg,var(--rojo),var(--naranja))}
+.mc-pedidos::before{background:linear-gradient(90deg,var(--azul2),var(--info))}
+.mc-clientes::before{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.mc-pend::before{background:linear-gradient(90deg,var(--warn),#fcd34d)}
+.mc-icon{font-size:28px;margin-bottom:10px}
+.mc-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--txt);margin-bottom:4px}
+.mc-lbl{font-size:12px;color:var(--muted);font-weight:500}
+
+/* ── Tables ──────────────────────────────────────── */
+.table-card{background:var(--card);border:1px solid var(--borde);border-radius:var(--r);overflow:hidden;margin-bottom:24px}
+.table-head{padding:18px 22px;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.table-head h3{font-size:16px;font-weight:700;color:var(--txt)}
+.search-inp{background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:9px 14px;font-size:13px;color:var(--txt);font-family:inherit;outline:none;transition:var(--trans);width:220px}
+.search-inp:focus{border-color:var(--naranja)}
+.search-inp::placeholder{color:var(--muted)}
+.filter-sel{background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--txt);font-family:inherit;outline:none;cursor:pointer}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;background:var(--card2);border-bottom:1px solid var(--borde);white-space:nowrap}
+td{padding:13px 16px;font-size:14px;color:var(--txt);border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+tr:last-child td{border-bottom:none}
+.no-data{text-align:center;padding:48px;color:var(--muted);font-size:14px}
+
+/* ── Status badges ───────────────────────────────── */
+.status{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:700}
+.s-pendiente{background:rgba(245,158,11,.15);color:var(--warn)}
+.s-aceptado{background:rgba(34,197,94,.15);color:var(--success)}
+.s-camino{background:rgba(56,189,248,.15);color:var(--info)}
+.s-entregado{background:rgba(139,92,246,.15);color:#a78bfa}
+.s-cancelado{background:rgba(239,68,68,.15);color:var(--danger)}
+
+/* ── Action buttons ──────────────────────────────── */
+.action-btn{padding:6px 12px;border-radius:8px;border:1px solid var(--borde);background:transparent;color:var(--txt);font-size:12px;font-weight:600;cursor:pointer;transition:var(--trans);font-family:inherit}
+.action-btn:hover{background:rgba(255,255,255,.08);border-color:var(--naranja)}
+.action-btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+
+/* ── Estado selector ─────────────────────────────── */
+.est-sel{background:var(--card2);border:1px solid var(--borde);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--txt);font-family:inherit;outline:none;cursor:pointer;transition:var(--trans)}
+.est-sel:focus{border-color:var(--naranja)}
+
+/* ── Stock ───────────────────────────────────────── */
+.stock-bar-wrap{display:flex;align-items:center;gap:8px}
+.stock-bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+.stock-fill{height:100%;border-radius:100px;transition:width .4s ease}
+.sf-ok{background:linear-gradient(90deg,var(--success),#4ade80)}
+.sf-low{background:linear-gradient(90deg,var(--warn),#fcd34d)}
+.sf-out{background:var(--danger)}
+.stock-num{font-size:12px;font-weight:700;min-width:28px;text-align:right}
+
+/* ── Reabastecimiento modal ──────────────────────── */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.modal-back.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--borde);border-radius:var(--r);width:min(440px,100%);box-shadow:0 24px 80px rgba(0,0,0,.4)}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:16px;font-weight:700}
+.modal-x{background:rgba(255,255,255,.08);border:none;color:var(--txt);width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:24px}
+.mform-grp{margin-bottom:16px}
+.mform-lbl{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:block}
+.mform-inp{width:100%;background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--txt);font-family:inherit;outline:none;transition:var(--trans)}
+.mform-inp:focus{border-color:var(--naranja)}
+.modal-footer{padding:0 24px 24px;display:flex;gap:10px;justify-content:flex-end}
+
+/* ── Toast ───────────────────────────────────────── */
+#toasts{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+.toast{background:var(--card2);color:var(--txt);border:1px solid var(--borde);padding:13px 18px;border-radius:12px;font-size:13px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.3);animation:tIn .3s ease;display:flex;align-items:center;gap:8px;max-width:300px}
+.toast.ok{border-left:3px solid var(--success)}
+.toast.err{border-left:3px solid var(--danger)}
+@keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:none;opacity:1}}
+
+/* ── Responsive ──────────────────────────────────── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:none}
+  .main{margin-left:0}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .search-inp{width:160px}
+}
+</style>
+</head>
+<body>
+
+<div id="toasts"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <img class="sb-logo-img" src="https://i.postimg.cc/N06NGXyj/Chat-GPT-Image-25-mar-2026-14-23-37.png" alt="" onerror="this.style.display='none'">
+    <div>
+      <div class="sb-brand">La <em>Tiendita</em></div>
+      <span class="sb-badge">ADMIN</span>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Principal</div>
+    <a class="sb-item active" onclick="showTab('dashboard')"><span class="icon">📊</span> Dashboard</a>
+    <a class="sb-item" onclick="showTab('pedidos')"><span class="icon">📦</span> Pedidos <span id="sbPendBadge" style="margin-left:auto;background:var(--warn);color:#000;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;display:none"></span></a>
+    <div class="sb-section">Inventario</div>
+    <a class="sb-item" onclick="showTab('stock')"><span class="icon">🏪</span> Stock</a>
+    <div class="sb-section">Clientes</div>
+    <a class="sb-item" onclick="showTab('clientes')"><span class="icon">👥</span> Clientes</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user"><strong>Administrador</strong>La Tiendita Venezolana</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1 id="pageTitle">Dashboard</h1>
+      <p id="pageSubtitle">Resumen general del negocio</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="tb-btn ghost" onclick="recargar()">🔄 Actualizar</button>
+      <button class="tb-btn primary" onclick="window.open('index.html','_blank')">🛒 Ver Tienda</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="tab-panel active" id="tab-dashboard">
+      <div class="metrics-grid">
+        <div class="metric-card mc-ventas"><div class="mc-icon">💰</div><div class="mc-val" id="mVentas">—</div><div class="mc-lbl">Ventas del mes (CLP)</div></div>
+        <div class="metric-card mc-pedidos"><div class="mc-icon">📦</div><div class="mc-val" id="mPedidos">—</div><div class="mc-lbl">Total pedidos</div></div>
+        <div class="metric-card mc-clientes"><div class="mc-icon">👥</div><div class="mc-val" id="mClientes">—</div><div class="mc-lbl">Clientes registrados</div></div>
+        <div class="metric-card mc-pend"><div class="mc-icon">⏳</div><div class="mc-val" id="mPendientes">—</div><div class="mc-lbl">Pedidos pendientes</div></div>
+      </div>
+
+      <!-- Estado pedidos -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:28px">
+        <div class="metric-card" style="text-align:center;padding:18px">
+          <div style="font-size:24px;margin-bottom:6px">✅</div>
+          <div class="mc-val" id="mAcep" style="font-size:22px">—</div>
+          <div class="mc-lbl">Aceptados</div>
+        </div>
+        <div class="metric-card" style="text-align:center;padding:18px">
+          <div style="font-size:24px;margin-bottom:6px">🛵</div>
+          <div class="mc-val" id="mCamino" style="font-size:22px">—</div>
+          <div class="mc-lbl">En camino</div>
+        </div>
+        <div class="metric-card" style="text-align:center;padding:18px">
+          <div style="font-size:24px;margin-bottom:6px">❌</div>
+          <div class="mc-val" id="mCancel" style="font-size:22px">—</div>
+          <div class="mc-lbl">Cancelados</div>
+        </div>
+      </div>
+
+      <!-- Últimos pedidos -->
+      <div class="table-card">
+        <div class="table-head"><h3>📋 Últimos Pedidos</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Delivery</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr></thead>
+            <tbody id="tbDash"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Stock crítico -->
+      <div class="table-card" id="stockCriticoCard" style="display:none">
+        <div class="table-head" style="background:rgba(239,68,68,.08)"><h3>🚨 Stock Crítico</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Producto</th><th>Stock</th><th>Acción</th></tr></thead>
+            <tbody id="tbStockCritico"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PEDIDOS -->
+    <div class="tab-panel" id="tab-pedidos">
+      <div class="table-card">
+        <div class="table-head">
+          <h3>📦 Todos los Pedidos</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input class="search-inp" id="searchPed" type="text" placeholder="Buscar pedido…" oninput="filterPedidos()">
+            <select class="filter-sel" id="filterEst" onchange="filterPedidos()">
+              <option value="">Todos los estados</option>
+              <option>Pendiente</option><option>Aceptado</option>
+              <option>En camino</option><option>Entregado</option><option>Cancelado</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Delivery</th><th>Total</th><th>Pago</th><th>Estado</th><th>Cambiar</th></tr></thead>
+            <tbody id="tbPedidos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOCK -->
+    <div class="tab-panel" id="tab-stock">
+      <div class="table-card">
+        <div class="table-head">
+          <h3>🏪 Inventario de Productos</h3>
+          <input class="search-inp" id="searchStock" type="text" placeholder="Buscar producto…" oninput="filterStock()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Categoría</th><th>Producto</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Reabastecer</th></tr></thead>
+            <tbody id="tbStock"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div class="tab-panel" id="tab-clientes">
+      <div class="table-card">
+        <div class="table-head">
+          <h3>👥 Base de Clientes</h3>
+          <input class="search-inp" id="searchCli" type="text" placeholder="Buscar cliente…" oninput="filterClientes()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Primer Pedido</th><th>Último Pedido</th><th>N° Pedidos</th><th>Total CLP</th></tr></thead>
+            <tbody id="tbClientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL REABASTECER -->
+<div class="modal-back" id="modalReab">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📦 Reabastecer Stock</h3>
+      <button class="modal-x" onclick="closeReab()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mform-grp"><label class="mform-lbl">Producto</label><input class="mform-inp" id="reabNombre" readonly></div>
+      <input type="hidden" id="reabID">
+      <div class="mform-grp"><label class="mform-lbl">Stock actual</label><input class="mform-inp" id="reabActual" readonly></div>
+      <div class="mform-grp"><label class="mform-lbl">Cantidad a agregar *</label><input class="mform-inp" id="reabCant" type="number" min="1" placeholder="Ej: 20"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="tb-btn ghost" onclick="closeReab()">Cancelar</button>
+      <button class="tb-btn primary" onclick="doReab()">✅ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyVnTuYHNR-OfNLrXeGiIbrmak7Dhe6Z99y-IZexVxBUeWWKfO4SzygJZHu_ckrf2BI/exec";
+</script>
+<script src="ap.js"></script>
+<script>
+/* ── Estado global ──────────────────────────────── */
+let todosLosPedidos = [];
+let todoElStock     = {};
+let todosLosClientes= [];
+
+/* ── Navegación ─────────────────────────────────── */
+const pageTitles = {
+  dashboard:"Dashboard", pedidos:"Gestión de Pedidos",
+  stock:"Inventario", clientes:"Clientes"
+};
+const pageSubs = {
+  dashboard:"Resumen general del negocio",
+  pedidos:"Controla y actualiza el estado de los pedidos",
+  stock:"Gestiona el inventario de productos",
+  clientes:"Base de datos de clientes"
+};
+
+function showTab(tab) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".sb-item").forEach(i => i.classList.remove("active"));
+  document.getElementById("tab-"+tab).classList.add("active");
+  document.querySelector(`.sb-item[onclick="showTab('${tab}')"]`).classList.add("active");
+  document.getElementById("pageTitle").textContent = pageTitles[tab]||tab;
+  document.getElementById("pageSubtitle").textContent = pageSubs[tab]||"";
+  if (tab==="pedidos")   renderPedidos();
+  if (tab==="stock")     renderStock();
+  if (tab==="clientes")  renderClientes();
+}
+
+/* ── Init ────────────────────────────────────────── */
+window.addEventListener("DOMContentLoaded", recargar);
+
+function recargar() {
+  toast("⏳ Cargando datos…","");
+  Promise.all([
+    GAS.getMetricas(),
+    GAS.getCatalogo()
+  ]).then(([met, cat]) => {
+    if (met && met.ok) renderMetricas(met);
+    if (cat) todoElStock = cat;
+    toast("✅ Datos actualizados","ok");
+  }).catch(err => toast("Error: "+err.message,"err"));
+}
+
+/* ── Métricas ────────────────────────────────────── */
+function renderMetricas(m) {
+  document.getElementById("mVentas").textContent   = "$"+(m.ventasMes||0).toLocaleString("es-CL");
+  document.getElementById("mPedidos").textContent  = m.totalPedidos||0;
+  document.getElementById("mClientes").textContent = m.totalClientes||0;
+  document.getElementById("mPendientes").textContent= m.pendientes||0;
+  document.getElementById("mAcep").textContent     = m.aceptados||0;
+  document.getElementById("mCamino").textContent   = m.enCamino||0;
+  document.getElementById("mCancel").textContent   = m.cancelados||0;
+
+  if (m.pendientes > 0) {
+    const b = document.getElementById("sbPendBadge");
+    b.textContent = m.pendientes; b.style.display = "inline";
+  }
+
+  // Últimos pedidos
+  todosLosPedidos = m.pedidosRecientes || [];
+  renderTbDash(todosLosPedidos.slice(0,10));
+
+  // Stock crítico
+  if (m.stockCritico && m.stockCritico.length) {
+    document.getElementById("stockCriticoCard").style.display = "block";
+    document.getElementById("tbStockCritico").innerHTML = m.stockCritico.map(p =>
+      `<tr>
+        <td>${p.nombre}</td>
+        <td><span style="color:var(--danger);font-weight:700">⚠️ ${p.stock}</span></td>
+        <td><button class="action-btn" onclick="abrirReab('${p.id}','${p.nombre}',${p.stock})">Reabastecer</button></td>
+      </tr>`
+    ).join("");
+  }
+}
+
+function renderTbDash(pedidos) {
+  const tbody = document.getElementById("tbDash");
+  if (!pedidos.length) { tbody.innerHTML=`<tr><td colspan="7" class="no-data">Sin pedidos</td></tr>`; return; }
+  tbody.innerHTML = pedidos.map(p => {
+    const est = p["Estado"]||"Pendiente";
+    return `<tr>
+      <td><code style="color:var(--naranja);font-size:12px">${p["ID Pedido"]||"—"}</code></td>
+      <td><strong>${p["Nombre Cliente"]||"—"}</strong></td>
+      <td style="font-weight:700">$${parseInt(p["Total CLP"]||0).toLocaleString("es-CL")}</td>
+      <td>${p["¿Delivery?"]==="Sí"?"🛵 Sí":"🏠 Retiro"}</td>
+      <td>${statusBadge(est)}</td>
+      <td style="font-size:12px;color:var(--muted)">${String(p["Fecha"]||"").substring(0,16)}</td>
+      <td>
+        <select class="est-sel" onchange="cambiarEstado('${p["ID Pedido"]}',this.value,this)">
+          ${["Pendiente","Aceptado","En camino","Entregado","Cancelado"]
+            .map(s=>`<option${s===est?" selected":""}>${s}</option>`).join("")}
+        </select>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+/* ── Pedidos ─────────────────────────────────────── */
+function renderPedidos() {
+  if (!todosLosPedidos.length) {
+    GAS.getPedidos(100).then(p => { todosLosPedidos=p||[]; filterPedidos(); }).catch(()=>{});
+    return;
+  }
+  filterPedidos();
+}
+
+function filterPedidos() {
+  const q   = (document.getElementById("searchPed")?.value||"").toLowerCase();
+  const est = document.getElementById("filterEst")?.value||"";
+  const filtered = todosLosPedidos.filter(p => {
+    const hayQ = !q || (p["ID Pedido"]||"").toLowerCase().includes(q)
+      || (p["Nombre Cliente"]||"").toLowerCase().includes(q)
+      || (p["Teléfono"]||"").includes(q);
+    const hayE = !est || (p["Estado"]||"")=== est;
+    return hayQ && hayE;
+  });
+  const tbody = document.getElementById("tbPedidos");
+  if (!filtered.length) { tbody.innerHTML=`<tr><td colspan="9" class="no-data">Sin resultados</td></tr>`; return; }
+  tbody.innerHTML = filtered.map(p => {
+    const est2 = p["Estado"]||"Pendiente";
+    return `<tr>
+      <td><code style="color:var(--naranja);font-size:12px">${p["ID Pedido"]||"—"}</code></td>
+      <td style="font-size:12px;color:var(--muted)">${String(p["Fecha"]||"").substring(0,16)}</td>
+      <td><strong>${p["Nombre Cliente"]||"—"}</strong></td>
+      <td style="font-size:13px">${p["Teléfono"]||"—"}</td>
+      <td>${p["¿Delivery?"]==="Sí"?"🛵":"🏠"}</td>
+      <td style="font-weight:700">$${parseInt(p["Total CLP"]||0).toLocaleString("es-CL")}</td>
+      <td style="font-size:12px">${p["Método Pago"]||"—"}</td>
+      <td>${statusBadge(est2)}</td>
+      <td>
+        <select class="est-sel" onchange="cambiarEstado('${p["ID Pedido"]}',this.value,this)">
+          ${["Pendiente","Aceptado","En camino","Entregado","Cancelado"]
+            .map(s=>`<option${s===est2?" selected":""}>${s}</option>`).join("")}
+        </select>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function cambiarEstado(id, nuevoEstado, sel) {
+  sel.disabled = true;
+  GAS.actualizarEstado(id, nuevoEstado)
+    .then(r => {
+      sel.disabled = false;
+      if (r && r.ok) {
+        // Actualizar en caché
+        const p = todosLosPedidos.find(x => x["ID Pedido"]===id);
+        if (p) p["Estado"] = nuevoEstado;
+        toast("✅ Estado → "+nuevoEstado, "ok");
+      } else {
+        toast("Error al actualizar", "err"); sel.value = sel.dataset.prev||"Pendiente";
+      }
+    })
+    .catch(() => { sel.disabled=false; toast("Error de conexión","err"); });
+}
+
+/* ── Stock ───────────────────────────────────────── */
+function renderStock() {
+  filterStock();
+}
+
+function filterStock() {
+  const q = (document.getElementById("searchStock")?.value||"").toLowerCase();
+  const tbody = document.getElementById("tbStock");
+  let rows = "", any = false;
+  Object.keys(todoElStock).forEach(cat => {
+    Object.keys(todoElStock[cat]).forEach(id => {
+      const p = todoElStock[cat][id];
+      const nombre = p.nombre || id;
+      if (q && !nombre.toLowerCase().includes(q) && !cat.toLowerCase().includes(q) && !id.toLowerCase().includes(q)) return;
+      const stock = parseInt(p.stock)||0;
+      const maxBar = 20, fill = Math.min(100, Math.round(stock/maxBar*100));
+      const cls = stock<=0?"sf-out":stock<=5?"sf-low":"sf-ok";
+      const est = stock<=0?"<span style='color:var(--danger);font-weight:700'>⛔ Agotado</span>":stock<=5?"<span style='color:var(--warn);font-weight:700'>⚠️ Bajo</span>":"<span style='color:var(--success);font-weight:700'>✅ OK</span>";
+      rows += `<tr>
+        <td><code style="font-size:12px;color:var(--naranja)">${id}</code></td>
+        <td><span style="background:rgba(247,127,0,.1);color:var(--naranja);padding:3px 8px;border-radius:100px;font-size:12px;font-weight:700">${cat}</span></td>
+        <td><strong>${nombre}</strong></td>
+        <td>$${parseInt(p.precio||0).toLocaleString("es-CL")}</td>
+        <td>
+          <div class="stock-bar-wrap">
+            <div class="stock-bar"><div class="stock-fill ${cls}" style="width:${fill}%"></div></div>
+            <span class="stock-num" style="color:${stock<=0?'var(--danger)':stock<=5?'var(--warn)':'var(--success)'}">${stock}</span>
+          </div>
+        </td>
+        <td>${est}</td>
+        <td><button class="action-btn" onclick="abrirReab('${id}','${nombre}',${stock})">📦 Reabastecer</button></td>
+      </tr>`;
+      any = true;
+    });
+  });
+  if (!any) rows = `<tr><td colspan="7" class="no-data">${Object.keys(todoElStock).length?'Sin resultados':'Cargando catálogo…'}</td></tr>`;
+  tbody.innerHTML = rows;
+}
+
+/* ── Clientes ────────────────────────────────────── */
+function renderClientes() {
+  if (todosLosClientes.length) { filterClientes(); return; }
+  GAS.getClientes().then(c => { todosLosClientes=c||[]; filterClientes(); }).catch(()=>{});
+}
+
+function filterClientes() {
+  const q = (document.getElementById("searchCli")?.value||"").toLowerCase();
+  const tbody = document.getElementById("tbClientes");
+  const filtered = todosLosClientes.filter(c =>
+    !q || (c["Nombre"]||"").toLowerCase().includes(q)
+       || (c["Correo"]||"").toLowerCase().includes(q)
+       || (c["Teléfono"]||"").includes(q)
+  );
+  if (!filtered.length) { tbody.innerHTML=`<tr><td colspan="7" class="no-data">Sin clientes registrados</td></tr>`; return; }
+  tbody.innerHTML = filtered.map(c => `<tr>
+    <td><strong>${c["Nombre"]||"—"}</strong></td>
+    <td style="font-size:13px">${c["Correo"]||"—"}</td>
+    <td>${c["Teléfono"]||"—"}</td>
+    <td style="font-size:12px;color:var(--muted)">${c["Primer Pedido"]||"—"}</td>
+    <td style="font-size:12px;color:var(--muted)">${c["Último Pedido"]||"—"}</td>
+    <td style="text-align:center;font-weight:700">${c["Total Pedidos"]||0}</td>
+    <td style="font-weight:700">$${parseFloat(c["Monto Total CLP"]||0).toLocaleString("es-CL")}</td>
+  </tr>`).join("");
+}
+
+/* ── Reabastecer ─────────────────────────────────── */
+function abrirReab(id, nombre, actual) {
+  document.getElementById("reabID").value = id;
+  document.getElementById("reabNombre").value = nombre;
+  document.getElementById("reabActual").value = actual;
+  document.getElementById("reabCant").value = "";
+  document.getElementById("modalReab").classList.add("open");
+}
+function closeReab() { document.getElementById("modalReab").classList.remove("open"); }
+
+function doReab() {
+  const id   = document.getElementById("reabID").value;
+  const cant = parseInt(document.getElementById("reabCant").value);
+  if (!cant || cant <= 0) { toast("Ingresa una cantidad válida","err"); return; }
+  GAS.reabastecerStock(id, cant)
+    .then(r => {
+      closeReab();
+      if (r && r.ok) {
+        toast("✅ "+r.nombre+": +"+cant+" (Total: "+r.stockActual+")", "ok");
+        GAS.getCatalogo().then(c => { if(c) { todoElStock=c; filterStock(); }}).catch(()=>{});
+      } else { toast("Error: "+(r&&r.error)||"sin detalles","err"); }
+    }).catch(() => toast("Error de conexión","err"));
+}
+
+/* ── Helpers ─────────────────────────────────────── */
+function statusBadge(est) {
+  const map = {
+    Pendiente:"s-pendiente ⏳", Aceptado:"s-aceptado ✅",
+    "En camino":"s-camino 🛵", Entregado:"s-entregado 🎉", Cancelado:"s-cancelado ❌"
+  };
+  const parts = (map[est]||"s-pendiente "+est).split(" ");
+  const cls = parts[0], icon = parts.slice(1).join(" ");
+  return `<span class="status ${cls}">${icon} ${est}</span>`;
+}
+
+function toast(msg, tipo) {
+  const w = document.getElementById("toasts"), d = document.createElement("div");
+  d.className = "toast "+(tipo||""); d.textContent = msg;
+  w.appendChild(d);
+  setTimeout(() => { d.style.transition="opacity .4s"; d.style.opacity="0"; setTimeout(()=>d.remove(),400); }, 3500);
+}
+</script>
+</body>
+</html>
